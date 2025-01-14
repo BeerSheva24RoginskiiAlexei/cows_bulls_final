@@ -161,7 +161,6 @@ public class GameClient {
             GameClient client = new GameClient();
 
             while (true) {
-                // Выводим меню
                 System.out.println("\nChoose an option:");
                 System.out.println("1. Sign Up");
                 System.out.println("2. Sign In");
@@ -171,7 +170,7 @@ public class GameClient {
                 System.out.println("6. Exit");
 
                 int choice = client.scanner.nextInt();
-                client.scanner.nextLine(); // Consume newline character
+                client.scanner.nextLine(); 
 
                 switch (choice) {
                     case 1:
@@ -191,7 +190,7 @@ public class GameClient {
                         break;
                     case 6:
                         client.close();
-                        return; // Exit the program
+                        return; 
                     default:
                         System.out.println("Invalid choice, try again.");
                 }
