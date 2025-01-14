@@ -36,6 +36,7 @@ public class BullsCowsPersistenceUnitInfo implements PersistenceUnitInfo {
         return null;
     }
 
+    @SuppressWarnings("removal")
     @Override
     public PersistenceUnitTransactionType getTransactionType() {
         return null;

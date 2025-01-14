@@ -17,8 +17,8 @@ public class BullsCowsProtocol implements Protocol {
     @Override
     public Response getResponse(Request request) {
         try {
-            String type = request.requestType(); // Используем метод для получения типа запроса
-            String data = request.requestData(); // Используем метод для получения данных запроса
+            String type = request.requestType(); 
+            String data = request.requestData(); 
 
             switch (type) {
                 case "REGISTER":
@@ -44,37 +44,30 @@ public class BullsCowsProtocol implements Protocol {
     }
 
     private Response handleRegister(String data) {
-        // Логика регистрации пользователя
         return new Response(ResponseCode.OK, "User registered successfully");
     }
 
     private Response handleLogin(String data) {
-        // Логика авторизации пользователя
         return new Response(ResponseCode.OK, "User logged in successfully");
     }
 
     private Response handleCreateGame(String data) {
-        // Логика создания игры
         return new Response(ResponseCode.OK, "Game created successfully");
     }
 
     private Response handleJoinGame(String data) {
-        // Логика подключения к игре
         return new Response(ResponseCode.OK, "Joined game successfully");
     }
 
     private Response handleStartGame(String data) {
-        // Логика начала игры
         return new Response(ResponseCode.OK, "Game started successfully");
     }
 
     private Response handleMakeMove(String data) {
-        // Логика выполнения хода
         return new Response(ResponseCode.OK, "Move made successfully");
     }
 
     private Response handleViewGames(String data) {
-        // Логика просмотра игр (доступных и активных)
         return new Response(ResponseCode.OK, "Games retrieved successfully");
     }
 }

@@ -7,7 +7,7 @@ import telran.net.*;
 
 public class GameClient {
     private static final String SERVER_ADDRESS = "localhost";
-    private static final int SERVER_PORT = 12345;
+    private static final int SERVER_PORT = 5000;
 
     private Socket socket;
     private BufferedReader in;
@@ -15,7 +15,6 @@ public class GameClient {
     private Scanner scanner;
 
     public GameClient() throws IOException {
-
         socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         out = new PrintWriter(socket.getOutputStream(), true);
@@ -161,13 +160,42 @@ public class GameClient {
         try {
             GameClient client = new GameClient();
 
-            client.signUp();
-            client.signIn();
-            client.createGame();
-            client.joinGame();
-            client.makeMove();
+            while (true) {
+                // Выводим меню
+                System.out.println("\nChoose an option:");
+                System.out.println("1. Sign Up");
+                System.out.println("2. Sign In");
+                System.out.println("3. Create Game");
+                System.out.println("4. Join Game");
+                System.out.println("5. Make Move");
+                System.out.println("6. Exit");
 
-            client.close();
+                int choice = client.scanner.nextInt();
+                client.scanner.nextLine(); // Consume newline character
+
+                switch (choice) {
+                    case 1:
+                        client.signUp();
+                        break;
+                    case 2:
+                        client.signIn();
+                        break;
+                    case 3:
+                        client.createGame();
+                        break;
+                    case 4:
+                        client.joinGame();
+                        break;
+                    case 5:
+                        client.makeMove();
+                        break;
+                    case 6:
+                        client.close();
+                        return; // Exit the program
+                    default:
+                        System.out.println("Invalid choice, try again.");
+                }
+            }
         } catch (IOException e) {
             System.err.println("Error initializing client: " + e.getMessage());
         }
