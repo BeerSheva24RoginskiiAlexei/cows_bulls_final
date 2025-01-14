@@ -2,24 +2,27 @@ package telran.game.entities;
 
 import jakarta.persistence.*;
 
-@Table(name = "move")
 @Entity
+@Table(name = "move")
 public class Move {
     @Id
-    @GeneratedValue
-    long id;
-    int bulls;
-    int cows;
-    String sequence;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+
     @ManyToOne
-    @JoinColumn(name = "game_gamer_id")
-    GameGamer gameGamer;
+    @JoinColumn(name = "game_gamer_id", referencedColumnName = "id", insertable = false, updatable = false)
+    private GameGamer gameGamer;
 
-    @Override
-    public String toString() {
-        return "Move [id=" + id + ", bulls=" + bulls + ", cows=" + cows + ", sequence=" + sequence + ", gameGamer=" + gameGamer.id + "]";
-    }
+    @Column(name = "bulls")
+    private int bulls;
 
+    @Column(name = "cows")
+    private int cows;
+
+    @Column(name = "sequence")
+    private String sequence;
+
+    // Конструктор
     public Move(GameGamer gameGamer, int bulls, int cows, String sequence) {
         this.gameGamer = gameGamer;
         this.bulls = bulls;
@@ -27,15 +30,42 @@ public class Move {
         this.sequence = sequence;
     }
 
-    public String getSequence() {
-        return sequence;
+    // Геттеры и сеттеры
+    public GameGamer getGameGamer() {
+        return gameGamer;
+    }
+
+    public void setGameGamer(GameGamer gameGamer) {
+        this.gameGamer = gameGamer;
     }
 
     public int getBulls() {
         return bulls;
     }
 
+    public void setBulls(int bulls) {
+        this.bulls = bulls;
+    }
+
     public int getCows() {
         return cows;
+    }
+
+    public void setCows(int cows) {
+        this.cows = cows;
+    }
+
+    public String getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(String sequence) {
+        this.sequence = sequence;
+    }
+
+    @Override
+    public String toString() {
+        return "Move [id=" + id + ", bulls=" + bulls + ", cows=" + cows + ", sequence=" + sequence + ", gameGamerId="
+                + (gameGamer != null ? gameGamer.getId() : "null") + "]";
     }
 }

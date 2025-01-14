@@ -17,7 +17,13 @@ public interface BullsCowsService {
 
     public List<Long> getListStartebleGames(String username);
 
-    public void startGame(String username, long gameId);
+    public void startGame(long gameId);
 
     public List<MoveResult> makeMove(String username, long gameId, String sequence);
+
+    public String getSecretSequence(long gameId);
+
+    boolean isPlayerInGame(String username, long gameId); 
+
+    boolean isGameStarted(long gameId); 
 }

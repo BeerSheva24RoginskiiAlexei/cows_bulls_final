@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import telran.game.MoveResult;
+import telran.game.entities.Game;
 
 public interface BullsCowsRepository {
     public boolean isGamerExists(String username);
@@ -18,7 +19,7 @@ public interface BullsCowsRepository {
 
     public List<Long> findStartebleGames(String username);
 
-    public void startGame(String username, long gameId);
+    public void startGame(long gameId);
 
     public void makeMove(String username, long gameId, String sequence, int bulls, int cows);
 
@@ -27,4 +28,14 @@ public interface BullsCowsRepository {
     public void setWinnerAndFinishGame(String username, long gameId);
 
     public List<MoveResult> findAllMovesGameGamer(String username, long gameId);
+
+    public long getPlayerCountInGame(long gameId);
+
+    public boolean isPlayerInGame(String username, long gameId);
+
+    public boolean isGameStarted(long gameId);
+
+    public String getSecretSequence(long gameId);
+
+    public Game getGame(long gameId);
 }

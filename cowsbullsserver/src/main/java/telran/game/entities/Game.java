@@ -37,6 +37,18 @@ public class Game {
         this.dateTime = dateTime;
     }
 
+    public LocalDateTime getStartGame() { 
+        return dateTime;
+    }
+
+    public String getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(String sequence) {
+        this.sequence = sequence;
+    }
+
     public Game() {
     }
 

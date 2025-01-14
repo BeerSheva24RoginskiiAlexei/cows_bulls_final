@@ -2,6 +2,7 @@ package telran.game;
 
 import java.io.*;
 import java.net.*;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 import org.json.JSONObject;
@@ -87,13 +88,13 @@ public class GameClient {
 
     public void createGame() {
         Request request = new Request("CREATE_GAME", "");
-    
+
         sendRequest(request);
-    
+
         Response response = receiveResponse();
         System.out.println("Response Code: " + response.responseCode());
         System.out.println("Response Message: " + response.responseData());
-    
+
         if (response.responseCode() == ResponseCode.OK) {
             System.out.println("Game created successfully: " + response.responseData());
         } else {
@@ -101,48 +102,19 @@ public class GameClient {
         }
     }
 
-   public void joinGame() {
-    System.out.print("Enter game ID to join: ");
-    long gameId = scanner.nextLong();
-    scanner.nextLine();  
-
-    System.out.print("Enter your username: ");
-    String username = scanner.nextLine();
-
-    JSONObject jsonData = new JSONObject();
-    jsonData.put("gameId", gameId);
-    jsonData.put("username", username);
-
-    Request request = new Request("JOIN_GAME", jsonData.toString());
-    sendRequest(request);
-
-    Response response = receiveResponse();
-    System.out.println("Response Code: " + response.responseCode());
-    System.out.println("Response Message: " + response.responseData());
-
-    if (response.responseCode() == ResponseCode.OK) {
-        System.out.println("Joined game successfully: " + response.responseData());
-    } else {
-        System.out.println("Error: " + response.responseCode() + " - " + response.responseData());
-    }
-}
-
-    public void makeMove() {
-        System.out.print("Enter game ID: ");
+    public void joinGame() {
+        System.out.print("Enter game ID to join: ");
         long gameId = scanner.nextLong();
         scanner.nextLine();
 
-        System.out.print("Enter your guess sequence: ");
-        String sequence = scanner.nextLine();
+        System.out.print("Enter your username: ");
+        String username = scanner.nextLine();
 
-        System.out.print("Enter number of bulls: ");
-        int bulls = scanner.nextInt();
+        JSONObject jsonData = new JSONObject();
+        jsonData.put("gameId", gameId);
+        jsonData.put("username", username);
 
-        System.out.print("Enter number of cows: ");
-        int cows = scanner.nextInt();
-        scanner.nextLine();
-
-        Request request = new Request("MAKE_MOVE", gameId + ":" + sequence + ":" + bulls + ":" + cows);
+        Request request = new Request("JOIN_GAME", jsonData.toString());
         sendRequest(request);
 
         Response response = receiveResponse();
@@ -150,9 +122,72 @@ public class GameClient {
         System.out.println("Response Message: " + response.responseData());
 
         if (response.responseCode() == ResponseCode.OK) {
-            System.out.println("Move made successfully: " + response.responseData());
+            System.out.println("Joined game successfully: " + response.responseData());
         } else {
             System.out.println("Error: " + response.responseCode() + " - " + response.responseData());
+        }
+    }
+
+    public void playGame() {
+        try {
+            System.out.print("Enter your username: ");
+            String username = scanner.nextLine();
+
+            System.out.print("Enter game ID: ");
+            long gameId = scanner.nextLong();
+            scanner.nextLine();
+
+            System.out.print("Enter your guess sequence: ");
+            String sequence = scanner.nextLine();
+
+            JSONObject jsonData = new JSONObject();
+            jsonData.put("username", username);
+            jsonData.put("gameId", gameId);
+            jsonData.put("sequence", sequence);
+
+            Request request = new Request("MAKE_MOVE", jsonData.toString());
+            sendRequest(request);
+
+            Response response = receiveResponse();
+            System.out.println("Response Code: " + response.responseCode());
+            System.out.println("Response Message: " + response.responseData());
+
+            if (response.responseCode() == ResponseCode.OK) {
+                System.out.println("Move result: " + response.responseData());
+            } else {
+                System.out.println("Error: " + response.responseCode() + " - " + response.responseData());
+            }
+        } catch (Exception e) {
+            System.out.println("Unexpected error: " + e.getMessage());
+        }
+    }
+
+    public void startGame() {
+        try {
+            System.out.print("Enter game ID to start: ");
+            long gameId = scanner.nextLong();
+            scanner.nextLine();
+
+            JSONObject jsonData = new JSONObject();
+            jsonData.put("gameId", gameId);
+
+            Request request = new Request("START_GAME", jsonData.toString());
+            sendRequest(request);
+
+            Response response = receiveResponse();
+            System.out.println("Response Code: " + response.responseCode());
+            System.out.println("Response Message: " + response.responseData());
+
+            if (response.responseCode() == ResponseCode.OK) {
+                System.out.println("Game started successfully: " + response.responseData());
+            } else {
+                System.out.println("Error: " + response.responseCode() + " - " + response.responseData());
+            }
+        } catch (InputMismatchException e) {
+            System.out.println("Invalid input. Please enter a valid game ID.");
+            scanner.nextLine();
+        } catch (Exception e) {
+            System.out.println("Unexpected error: " + e.getMessage());
         }
     }
 
@@ -174,11 +209,12 @@ public class GameClient {
                 System.out.println("2. Sign In");
                 System.out.println("3. Create Game");
                 System.out.println("4. Join Game");
-                System.out.println("5. Make Move");
-                System.out.println("6. Exit");
+                System.out.println("5. Play Game");
+                System.out.println("6. Start Game");
+                System.out.println("7. Exit");
 
                 int choice = client.scanner.nextInt();
-                client.scanner.nextLine(); 
+                client.scanner.nextLine();
 
                 switch (choice) {
                     case 1:
@@ -194,11 +230,14 @@ public class GameClient {
                         client.joinGame();
                         break;
                     case 5:
-                        client.makeMove();
+                        client.playGame();
                         break;
                     case 6:
+                        client.startGame();
+                        break;
+                    case 7:
                         client.close();
-                        return; 
+                        return;
                     default:
                         System.out.println("Invalid choice, try again.");
                 }

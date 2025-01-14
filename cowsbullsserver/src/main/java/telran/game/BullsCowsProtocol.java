@@ -8,7 +8,9 @@ import telran.net.Response;
 import telran.net.ResponseCode;
 
 import java.time.LocalDate;
+import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import jakarta.persistence.EntityManager;
@@ -104,13 +106,13 @@ public class BullsCowsProtocol implements Protocol {
 
     private Response handleJoinGame(String data) {
         try {
-            System.out.println("Received data: " + data);  
+            System.out.println("Received data: " + data);
             JSONObject jsonObject = new JSONObject(data);
             String username = jsonObject.getString("username");
             long gameId = jsonObject.getLong("gameId");
             BullsCowsService service = new BullsCowsServiceImpl(em);
             service.joinToGame(username, gameId);
-    
+
             return new Response(ResponseCode.OK, "Joined game successfully");
         } catch (Exception e) {
             return new Response(ResponseCode.WRONG_DATA, "Failed to join game: " + e.getMessage());
@@ -118,12 +120,53 @@ public class BullsCowsProtocol implements Protocol {
     }
 
     private Response handleStartGame(String data) {
-        return new Response(ResponseCode.OK, "Game started successfully");
+        try {
+            JSONObject jsonObject = new JSONObject(data);
+            long gameId = jsonObject.getLong("gameId");
+
+            BullsCowsService service = new BullsCowsServiceImpl(em);
+            service.startGame( gameId);
+
+            return new Response(ResponseCode.OK, "Game started successfully.");
+        } catch (Exception e) {
+            return new Response(ResponseCode.INTERNAL_SERVER_ERROR, "Failed to start game: " + e.getMessage());
+        }
     }
 
-    private Response handleMakeMove(String data) {
-        return new Response(ResponseCode.OK, "Move made successfully");
+private Response handleMakeMove(String data) {
+    try {
+        JSONObject jsonObject = new JSONObject(data);
+        long gameId = jsonObject.getLong("gameId");
+        String username = jsonObject.getString("username");
+        String sequence = jsonObject.getString("sequence");
+
+        BullsCowsService service = new BullsCowsServiceImpl(em);
+
+        if (!service.isPlayerInGame(username, gameId)) {
+            return new Response(ResponseCode.BAD_REQUEST, "User is not part of this game.");
+        }
+
+        if (!service.isGameStarted(gameId)) {
+            return new Response(ResponseCode.BAD_REQUEST, "Game has not started yet.");
+        }
+
+
+        List<MoveResult> moveResults = service.makeMove(username, gameId, sequence);
+
+        JSONArray resultsArray = new JSONArray();
+        for (MoveResult result : moveResults) {
+            JSONObject resultJson = new JSONObject();
+            resultJson.put("sequence", result.sequence());
+            resultJson.put("bulls", result.bulls());
+            resultJson.put("cows", result.cows());
+            resultsArray.put(resultJson);
+        }
+
+        return new Response(ResponseCode.OK, resultsArray.toString());
+    } catch (Exception e) {
+        return new Response(ResponseCode.INTERNAL_SERVER_ERROR, "Failed to process move: " + e.getMessage());
     }
+}
 
     private Response handleViewGames(String data) {
         return new Response(ResponseCode.OK, "Games retrieved successfully");

@@ -1,14 +1,14 @@
 package telran.game.entities;
 
 import java.time.LocalDate;
-
 import jakarta.persistence.*;
+
 @Entity
 @Table(name="gamer")
 public class Gamer {
     @Id
-    String username;
-    LocalDate birthdate;
+    private String username;
+    private LocalDate birthdate;
 
     public Gamer() {
     }
@@ -16,6 +16,16 @@ public class Gamer {
     public Gamer(String username, LocalDate birthdate) {
         this.username = username;
         this.birthdate = birthdate;
+    }
+
+    // Геттер для username
+    public String getUsername() {
+        return username;
+    }
+
+    // Геттер для birthdate (если нужен)
+    public LocalDate getBirthdate() {
+        return birthdate;
     }
 
     @Override

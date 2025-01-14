@@ -77,40 +77,34 @@ public class BullsCowsRepositoryJpaImp implements BullsCowsRepository {
         var transaction = em.getTransaction();
         transaction.begin();
         try {
-            Game game = getGame(gameId);  // Получаем игру
-            Gamer gamer = getGamer(username);  // Получаем игрока
-    
-            // Проверяем, не был ли уже добавлен этот игрок в игру
+            Game game = getGame(gameId);
+            Gamer gamer = getGamer(username);
             TypedQuery<Long> query = em.createQuery(
-                "SELECT COUNT(gg) FROM GameGamer gg WHERE gg.game.id = :gameId AND gg.gamer.username = :username",
-                Long.class
-            );
+                    "SELECT COUNT(gg) FROM GameGamer gg WHERE gg.game.id = :gameId AND gg.gamer.username = :username",
+                    Long.class);
             query.setParameter("gameId", gameId);
             query.setParameter("username", username);
             long count = query.getSingleResult();
-    
+
             if (count > 0) {
                 throw new RuntimeException("Player already joined this game");
             }
-    
-            // Создаем новый объект GameGamer, Hibernate сгенерирует ID
+
             GameGamer gameGamer = new GameGamer(game, gamer);
-            em.persist(gameGamer);  // Сохраняем в базе данных
-    
-            transaction.commit();  // Завершаем транзакцию
+            em.persist(gameGamer);
+
+            transaction.commit();
         } catch (Exception e) {
             if (transaction.isActive()) {
-                transaction.rollback();  // Откатываем транзакцию в случае ошибки
+                transaction.rollback();
             }
-            // Логируем ошибку
             System.err.println("Error during game join: " + e.getMessage());
             throw new RuntimeException("Error while committing the transaction", e);
         }
     }
-    
-    
 
-    private Game getGame(long gameId) {
+    @Override
+    public Game getGame(long gameId) {
         Game game = em.find(Game.class, gameId);
         if (game == null) {
             throw new GameNotFoundException(gameId);
@@ -128,14 +122,17 @@ public class BullsCowsRepositoryJpaImp implements BullsCowsRepository {
     }
 
     @Override
-    public void startGame(String username, long gameId) {
+    public void startGame(long gameId) {
         Game game = getGame(gameId);
+        if (game == null) {
+            throw new EntityNotFoundException("Game with ID " + gameId + " not found.");
+        }
+
         var transaction = em.getTransaction();
         transaction.begin();
         try {
-            LocalDateTime dateTime = LocalDateTime.now();
-            game.setStartGame(dateTime);
-            em.persist(dateTime);
+            game.setStartGame(LocalDateTime.now());
+            em.merge(game);
             transaction.commit();
         } catch (Exception e) {
             transaction.rollback();
@@ -144,17 +141,38 @@ public class BullsCowsRepositoryJpaImp implements BullsCowsRepository {
     }
 
     @Override
+    public boolean isPlayerInGame(String username, long gameId) {
+        TypedQuery<Long> query = em.createQuery(
+                "SELECT COUNT(gg) FROM GameGamer gg WHERE gg.gamer.username = :username AND gg.game.id = :gameId",
+                Long.class);
+        query.setParameter("username", username);
+        query.setParameter("gameId", gameId);
+        return query.getSingleResult() > 0;
+    }
+
+    @Override
+    public boolean isGameStarted(long gameId) {
+        Game game = getGame(gameId);
+        return game != null && game.getStartGame() != null;
+    }
+
+    @Override
     public void makeMove(String username, long gameId, String sequence, int bulls, int cows) {
-        GameGamer gameGamer = getGameGamer(username, gameId);
+        // if (gameGamer == null) {
+        //     throw new EntityNotFoundException("Player not found in the game.");
+        // }
+
         var transaction = em.getTransaction();
         transaction.begin();
         try {
+            GameGamer gameGamer = getGameGamer(username, gameId);
             Move move = new Move(gameGamer, bulls, cows, sequence);
             em.persist(move);
             transaction.commit();
         } catch (Exception e) {
             transaction.rollback();
-            throw e;
+            e.printStackTrace();
+            throw new RuntimeException("Error while committing the transaction: " + e.getMessage(), e);
         }
     }
 
@@ -187,16 +205,12 @@ public class BullsCowsRepositoryJpaImp implements BullsCowsRepository {
 
     private GameGamer getGameGamer(String username, long gameId) {
         TypedQuery<GameGamer> query = em.createQuery(
-                "SELECT gg FROM GameGamer gg WHERE gg.game.id = :gameId AND gg.gamer.username = :username",
+                "SELECT g FROM GameGamer g WHERE g.game.id = :gameId AND g.gamer.username = :username",
                 GameGamer.class);
         query.setParameter("gameId", gameId);
         query.setParameter("username", username);
-
         List<GameGamer> result = query.getResultList();
-        if (result.isEmpty()) {
-            throw new GamerNotFoundException(username);
-        }
-        return result.get(0);
+        return result.isEmpty() ? null : result.get(0);
     }
 
     @Override
@@ -211,6 +225,23 @@ public class BullsCowsRepositoryJpaImp implements BullsCowsRepository {
         return moves.stream()
                 .map(move -> new MoveResult(move.getSequence(), move.getBulls(), move.getCows()))
                 .toList();
+    }
+
+    @Override
+    public long getPlayerCountInGame(long gameId) {
+        TypedQuery<Long> query = em.createQuery(
+                "SELECT COUNT(gc) FROM GameGamer gc WHERE gc.game.id = :gameId", Long.class);
+        query.setParameter("gameId", gameId);
+        return query.getSingleResult();
+    }
+
+    @Override
+    public String getSecretSequence(long gameId) {
+        Game game = em.find(Game.class, gameId);
+        if (game == null) {
+            throw new EntityNotFoundException("Game with ID " + gameId + " not found.");
+        }
+        return game.getSequence();
     }
 
 }
