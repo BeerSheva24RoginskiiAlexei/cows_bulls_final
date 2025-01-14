@@ -2,15 +2,16 @@ package telran.game.entities;
 
 import java.time.LocalDateTime;
 import jakarta.persistence.*;
+
 @Entity
-@Table(name="game")
+@Table(name = "game")
 public class Game {
     @Id
     @GeneratedValue
     long id;
-    @Column(name="date_time")
+    @Column(name = "date_time")
     LocalDateTime dateTime;
-    @Column(name="is_finished")
+    @Column(name = "is_finished")
     boolean isFinished;
     String sequence;
 
@@ -27,13 +28,16 @@ public class Game {
     public Game(String sequence) {
         this.sequence = sequence;
     }
-    
+
     public long getId() {
         return id;
     }
 
     public void setStartGame(LocalDateTime dateTime) {
         this.dateTime = dateTime;
+    }
+
+    public Game() {
     }
 
 }

@@ -3,6 +3,9 @@ package telran.game;
 import java.io.*;
 import java.net.*;
 import java.util.Scanner;
+
+import org.json.JSONObject;
+
 import telran.net.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -83,16 +86,14 @@ public class GameClient {
     }
 
     public void createGame() {
-        System.out.print("Enter game sequence: ");
-        String sequence = scanner.nextLine();
-
-        Request request = new Request("CREATE_GAME", sequence);
+        Request request = new Request("CREATE_GAME", "");
+    
         sendRequest(request);
-
+    
         Response response = receiveResponse();
         System.out.println("Response Code: " + response.responseCode());
         System.out.println("Response Message: " + response.responseData());
-
+    
         if (response.responseCode() == ResponseCode.OK) {
             System.out.println("Game created successfully: " + response.responseData());
         } else {
@@ -100,27 +101,31 @@ public class GameClient {
         }
     }
 
-    public void joinGame() {
-        System.out.print("Enter game ID to join: ");
-        long gameId = scanner.nextLong();
-        scanner.nextLine();
+   public void joinGame() {
+    System.out.print("Enter game ID to join: ");
+    long gameId = scanner.nextLong();
+    scanner.nextLine();  
 
-        System.out.print("Enter your username: ");
-        String username = scanner.nextLine();
+    System.out.print("Enter your username: ");
+    String username = scanner.nextLine();
 
-        Request request = new Request("JOIN_GAME", gameId + ":" + username);
-        sendRequest(request);
+    JSONObject jsonData = new JSONObject();
+    jsonData.put("gameId", gameId);
+    jsonData.put("username", username);
 
-        Response response = receiveResponse();
-        System.out.println("Response Code: " + response.responseCode());
-        System.out.println("Response Message: " + response.responseData());
+    Request request = new Request("JOIN_GAME", jsonData.toString());
+    sendRequest(request);
 
-        if (response.responseCode() == ResponseCode.OK) {
-            System.out.println("Joined game successfully: " + response.responseData());
-        } else {
-            System.out.println("Error: " + response.responseCode() + " - " + response.responseData());
-        }
+    Response response = receiveResponse();
+    System.out.println("Response Code: " + response.responseCode());
+    System.out.println("Response Message: " + response.responseData());
+
+    if (response.responseCode() == ResponseCode.OK) {
+        System.out.println("Joined game successfully: " + response.responseData());
+    } else {
+        System.out.println("Error: " + response.responseCode() + " - " + response.responseData());
     }
+}
 
     public void makeMove() {
         System.out.print("Enter game ID: ");

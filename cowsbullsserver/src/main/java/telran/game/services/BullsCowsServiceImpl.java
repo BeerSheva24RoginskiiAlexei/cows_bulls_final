@@ -42,14 +42,12 @@ public class BullsCowsServiceImpl implements BullsCowsService {
 
     @Override
     public List<Long> getListJoinebleGames(String username) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getListJoinebleGames'");
+        return repo.findJoinebleGames(username);
     }
 
     @Override
     public void joinToGame(String username, long gameId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'joinToGame'");
+        repo.joinToGame(username, gameId);
     }
 
     @Override

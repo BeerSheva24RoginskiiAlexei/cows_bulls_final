@@ -73,22 +73,42 @@ public class BullsCowsRepositoryJpaImp implements BullsCowsRepository {
         return query.getResultList();
     }
 
-    @Override
     public void joinToGame(String username, long gameId) {
         var transaction = em.getTransaction();
         transaction.begin();
         try {
-            Game game = getGame(gameId);
-            Gamer gamer = getGamer(username);
+            Game game = getGame(gameId);  // Получаем игру
+            Gamer gamer = getGamer(username);  // Получаем игрока
+    
+            // Проверяем, не был ли уже добавлен этот игрок в игру
+            TypedQuery<Long> query = em.createQuery(
+                "SELECT COUNT(gg) FROM GameGamer gg WHERE gg.game.id = :gameId AND gg.gamer.username = :username",
+                Long.class
+            );
+            query.setParameter("gameId", gameId);
+            query.setParameter("username", username);
+            long count = query.getSingleResult();
+    
+            if (count > 0) {
+                throw new RuntimeException("Player already joined this game");
+            }
+    
+            // Создаем новый объект GameGamer, Hibernate сгенерирует ID
             GameGamer gameGamer = new GameGamer(game, gamer);
-            em.persist(gameGamer);
-            transaction.commit();
+            em.persist(gameGamer);  // Сохраняем в базе данных
+    
+            transaction.commit();  // Завершаем транзакцию
         } catch (Exception e) {
-            transaction.rollback();
-            throw e;
+            if (transaction.isActive()) {
+                transaction.rollback();  // Откатываем транзакцию в случае ошибки
+            }
+            // Логируем ошибку
+            System.err.println("Error during game join: " + e.getMessage());
+            throw new RuntimeException("Error while committing the transaction", e);
         }
-
     }
+    
+    
 
     private Game getGame(long gameId) {
         Game game = em.find(Game.class, gameId);

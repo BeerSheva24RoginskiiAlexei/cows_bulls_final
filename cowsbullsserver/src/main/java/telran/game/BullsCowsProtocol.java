@@ -9,6 +9,8 @@ import telran.net.ResponseCode;
 
 import java.time.LocalDate;
 
+import org.json.JSONObject;
+
 import jakarta.persistence.EntityManager;
 
 public class BullsCowsProtocol implements Protocol {
@@ -53,7 +55,7 @@ public class BullsCowsProtocol implements Protocol {
         if (parts.length != 2) {
             return new Response(ResponseCode.WRONG_DATA, "Invalid data format for register");
         }
-    
+
         String username = parts[0];
         LocalDate birthdate;
         try {
@@ -61,7 +63,7 @@ public class BullsCowsProtocol implements Protocol {
         } catch (Exception e) {
             return new Response(ResponseCode.WRONG_DATA, "Invalid birthdate format");
         }
-    
+
         try {
             BullsCowsService service = new BullsCowsServiceImpl(em);
             service.register(username, birthdate);
@@ -70,19 +72,18 @@ public class BullsCowsProtocol implements Protocol {
             return new Response(ResponseCode.WRONG_DATA, e.getMessage());
         }
     }
-    
 
     private Response handleLogin(String data) {
         String[] parts = data.split(":");
         if (parts.length != 1) {
             return new Response(ResponseCode.WRONG_DATA, "Invalid data format for login");
         }
-    
+
         String username = parts[0];
-    
+
         try {
             BullsCowsService service = new BullsCowsServiceImpl(em);
-            service.login(username); 
+            service.login(username);
             return new Response(ResponseCode.OK, "User logged in successfully");
         } catch (Exception e) {
             return new Response(ResponseCode.WRONG_DATA, e.getMessage());
@@ -92,9 +93,9 @@ public class BullsCowsProtocol implements Protocol {
     private Response handleCreateGame(String data) {
         try {
             BullsCowsService service = new BullsCowsServiceImpl(em);
-    
+
             long gameId = service.createGame();
-    
+
             return new Response(ResponseCode.OK, "Game created successfully. Game ID: " + gameId);
         } catch (Exception e) {
             return new Response(ResponseCode.WRONG_DATA, "Error creating game: " + e.getMessage());
@@ -102,7 +103,18 @@ public class BullsCowsProtocol implements Protocol {
     }
 
     private Response handleJoinGame(String data) {
-        return new Response(ResponseCode.OK, "Joined game successfully");
+        try {
+            System.out.println("Received data: " + data);  
+            JSONObject jsonObject = new JSONObject(data);
+            String username = jsonObject.getString("username");
+            long gameId = jsonObject.getLong("gameId");
+            BullsCowsService service = new BullsCowsServiceImpl(em);
+            service.joinToGame(username, gameId);
+    
+            return new Response(ResponseCode.OK, "Joined game successfully");
+        } catch (Exception e) {
+            return new Response(ResponseCode.WRONG_DATA, "Failed to join game: " + e.getMessage());
+        }
     }
 
     private Response handleStartGame(String data) {
