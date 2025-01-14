@@ -11,7 +11,11 @@ import telran.game.entities.*;
 import telran.game.exceptions.*;
 
 public class BullsCowsRepositoryJpaImp implements BullsCowsRepository {
-    EntityManager em;
+    private final EntityManager em;
+
+    public BullsCowsRepositoryJpaImp(EntityManager em) {
+        this.em = em;
+    }
 
     @Override
     public void createGamer(String username, LocalDate birthdate) {
@@ -24,6 +28,7 @@ public class BullsCowsRepositoryJpaImp implements BullsCowsRepository {
             Gamer gamer = new Gamer(username, birthdate);
             em.persist(gamer);
             transaction.commit();
+            System.out.println("Gamer saved successfully: " + gamer);
         } catch (Exception e) {
             transaction.rollback();
             throw e;

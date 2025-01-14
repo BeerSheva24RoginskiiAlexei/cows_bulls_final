@@ -2,15 +2,21 @@ package telran.game.services;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
 
+import jakarta.persistence.EntityManager;
 import telran.game.MoveResult;
 import telran.game.db.*;
 import telran.game.exceptions.*;
 
 public class BullsCowsServiceImpl implements BullsCowsService {
     private static final long N_DIGITS = 4;
-     BullsCowsRepository repo = new BullsCowsRepositoryJpaImp();
-    String username = "";
+    private final BullsCowsRepository repo;
+
+    public BullsCowsServiceImpl(EntityManager em) {
+        this.repo = new BullsCowsRepositoryJpaImp(em);
+    }
 
     @Override
     public void register(String username, LocalDate birthdate) {
@@ -20,14 +26,18 @@ public class BullsCowsServiceImpl implements BullsCowsService {
     @Override
     public void login(String username) {
         if (!repo.isGamerExists(username)) {
-            throw new GamerNotFoundException(username);      
+            throw new GamerNotFoundException(username);
         }
     }
 
     @Override
     public long createGame() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'createGame'");
+        return repo.createGame(generateSequence());
+    }
+
+    public String generateSequence() {
+        return new Random().ints(0, 10).distinct().limit(N_DIGITS).boxed()
+                .map(i -> i.toString()).collect(Collectors.joining());
     }
 
     @Override
@@ -59,5 +69,5 @@ public class BullsCowsServiceImpl implements BullsCowsService {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'makeMove'");
     }
-    
+
 }

@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.*;
 import java.util.Scanner;
 import telran.net.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class GameClient {
     private static final String SERVER_ADDRESS = "localhost";
@@ -28,16 +29,18 @@ public class GameClient {
     public Response receiveResponse() {
         try {
             String responseStr = in.readLine();
-            if (responseStr != null) {
-                return new Response(
-                        ResponseCode.valueOf(responseStr.split(":")[0]),
-                        responseStr.split(":")[1]);
+            if (responseStr != null && !responseStr.isEmpty()) {
+                ObjectMapper mapper = new ObjectMapper();
+                return mapper.readValue(responseStr, Response.class);
             } else {
                 return new Response(ResponseCode.INTERNAL_SERVER_ERROR, "No response from server");
             }
         } catch (IOException e) {
             System.err.println("Error reading response: " + e.getMessage());
             return new Response(ResponseCode.INTERNAL_SERVER_ERROR, "Error reading response from server");
+        } catch (IllegalArgumentException e) {
+            System.err.println("Invalid response format: " + e.getMessage());
+            return new Response(ResponseCode.INTERNAL_SERVER_ERROR, "Invalid response format from server");
         }
     }
 
@@ -47,7 +50,7 @@ public class GameClient {
         System.out.print("Enter birthdate (yyyy-mm-dd): ");
         String birthdate = scanner.nextLine();
 
-        Request request = new Request("SIGN_UP", username + ":" + birthdate);
+        Request request = new Request("REGISTER", username + ":" + birthdate);
         sendRequest(request);
 
         Response response = receiveResponse();

@@ -76,10 +76,10 @@ public class BullsCowsPersistenceUnitInfo implements PersistenceUnitInfo {
     @Override
     public List<String> getManagedClassNames() {
         return List.of(
-                "telran.queries.entities.Game",
-                "telran.queries.entities.Gamer",
-                "telran.queries.entities.GameGamer",
-                "telran.queries.entities.Move");
+                "telran.game.entities.Game",
+                "telran.game.entities.Gamer",
+                "telran.game.entities.GameGamer",
+                "telran.game.entities.Move");
     }
 
     @Override
