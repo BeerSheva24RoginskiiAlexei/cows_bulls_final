@@ -158,14 +158,16 @@ public class BullsCowsRepositoryJpaImp implements BullsCowsRepository {
 
     @Override
     public void makeMove(String username, long gameId, String sequence, int bulls, int cows) {
-        // if (gameGamer == null) {
-        //     throw new EntityNotFoundException("Player not found in the game.");
-        // }
 
         var transaction = em.getTransaction();
         transaction.begin();
         try {
             GameGamer gameGamer = getGameGamer(username, gameId);
+            if (gameGamer == null) {
+                throw new EntityNotFoundException(
+                        "GameGamer not found for username: " + username + " and gameId: " + gameId);
+            }
+
             Move move = new Move(gameGamer, bulls, cows, sequence);
             em.persist(move);
             transaction.commit();
@@ -205,12 +207,17 @@ public class BullsCowsRepositoryJpaImp implements BullsCowsRepository {
 
     private GameGamer getGameGamer(String username, long gameId) {
         TypedQuery<GameGamer> query = em.createQuery(
-                "SELECT g FROM GameGamer g WHERE g.game.id = :gameId AND g.gamer.username = :username",
-                GameGamer.class);
+            "SELECT g FROM GameGamer g WHERE g.game.id = :gameId AND g.gamer.username = :username",
+            GameGamer.class
+        );
         query.setParameter("gameId", gameId);
         query.setParameter("username", username);
+    
         List<GameGamer> result = query.getResultList();
-        return result.isEmpty() ? null : result.get(0);
+        if (result.isEmpty()) {
+            return null;
+        }
+        return result.get(0);
     }
 
     @Override

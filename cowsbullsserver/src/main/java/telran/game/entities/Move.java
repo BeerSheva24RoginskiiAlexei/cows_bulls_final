@@ -10,7 +10,7 @@ public class Move {
     private long id;
 
     @ManyToOne
-    @JoinColumn(name = "game_gamer_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "game_gamer_id", nullable = false)
     private GameGamer gameGamer;
 
     @Column(name = "bulls")
@@ -22,7 +22,6 @@ public class Move {
     @Column(name = "sequence")
     private String sequence;
 
-    // Конструктор
     public Move(GameGamer gameGamer, int bulls, int cows, String sequence) {
         this.gameGamer = gameGamer;
         this.bulls = bulls;
@@ -30,7 +29,6 @@ public class Move {
         this.sequence = sequence;
     }
 
-    // Геттеры и сеттеры
     public GameGamer getGameGamer() {
         return gameGamer;
     }

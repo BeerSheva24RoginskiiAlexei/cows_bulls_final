@@ -20,17 +20,14 @@ public class GameGamer {
     @Column(name = "is_winner")
     private boolean isWinner;
 
-    // Конструктор
     public GameGamer(Game game, Gamer gamer) {
         this.game = game;
         this.gamer = gamer;
     }
 
-    // Пустой конструктор
     public GameGamer() {
     }
 
-    // Геттеры
     public long getId() {
         return id;
     }
@@ -47,7 +44,6 @@ public class GameGamer {
         return isWinner;
     }
 
-    // Сеттеры
     public void setGame(Game game) {
         this.game = game;
     }

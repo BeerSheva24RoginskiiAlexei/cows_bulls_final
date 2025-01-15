@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name="gamer")
+@Table(name = "gamer")
 public class Gamer {
     @Id
     private String username;
@@ -18,12 +18,10 @@ public class Gamer {
         this.birthdate = birthdate;
     }
 
-    // Геттер для username
     public String getUsername() {
         return username;
     }
 
-    // Геттер для birthdate (если нужен)
     public LocalDate getBirthdate() {
         return birthdate;
     }

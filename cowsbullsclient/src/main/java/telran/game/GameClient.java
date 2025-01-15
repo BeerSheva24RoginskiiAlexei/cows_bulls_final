@@ -5,6 +5,7 @@ import java.net.*;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import telran.net.*;
@@ -150,10 +151,24 @@ public class GameClient {
 
             Response response = receiveResponse();
             System.out.println("Response Code: " + response.responseCode());
-            System.out.println("Response Message: " + response.responseData());
 
             if (response.responseCode() == ResponseCode.OK) {
-                System.out.println("Move result: " + response.responseData());
+                String responseData = response.responseData();
+                JSONArray resultsArray = new JSONArray(responseData);
+
+                for (int i = 0; i < resultsArray.length(); i++) {
+                    JSONObject result = resultsArray.getJSONObject(i);
+                    int bulls = result.getInt("bulls");
+                    int cows = result.getInt("cows");
+                    String moveSequence = result.getString("sequence");
+
+                    System.out.println("Sequence: " + moveSequence);
+                    System.out.println("Cows: " + cows + ", Bulls: " + bulls);
+
+                    if (bulls == 4) {
+                        System.out.println("Congratulations! You won!");
+                    }
+                }
             } else {
                 System.out.println("Error: " + response.responseCode() + " - " + response.responseData());
             }
